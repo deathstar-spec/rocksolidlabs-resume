@@ -282,3 +282,210 @@ footer {
     gap: 4px;
   }
 }
+
+.body-copy {
+  color: var(--muted);
+  max-width: 720px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.5fr .8fr;
+  gap: 50px;
+}
+
+.quick-facts {
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.quick-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 15px 18px;
+  background: var(--panel);
+}
+
+.quick-facts span {
+  color: var(--muted);
+}
+
+.detail-list {
+  margin: 18px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.detail-list li {
+  margin: 8px 0;
+}
+
+.credential-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.credential-type {
+  color: var(--orange);
+  font-family: monospace;
+  font-size: .78rem;
+  letter-spacing: .12em;
+}
+
+.credential-date {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.education-list {
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.education-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.education-item strong,
+.education-item span {
+  display: block;
+}
+
+.education-item strong {
+  color: var(--text);
+}
+
+.project-case {
+  margin-top: 28px;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    var(--panel-light),
+    var(--panel)
+  );
+}
+
+.project-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.project-heading h3 {
+  margin: 5px 0 0;
+  font-size: 1.8rem;
+}
+
+.project-status {
+  color: var(--green);
+  border: 1px solid rgba(80,200,120,.25);
+  background: rgba(80,200,120,.08);
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-family: monospace;
+  font-size: .75rem;
+}
+
+.project-summary {
+  max-width: 780px;
+  color: var(--muted);
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 30px;
+}
+
+.project-meta span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-family: monospace;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.build-steps {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+}
+
+.build-steps li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  border-top: 1px solid var(--border);
+  padding: 14px 0;
+}
+
+.build-steps li > span {
+  color: var(--orange);
+  font-family: monospace;
+}
+
+.build-steps p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.lesson-box {
+  margin-top: 24px;
+  padding: 20px;
+  border-left: 3px solid var(--orange);
+  background: var(--orange-soft);
+}
+
+.lesson-box p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.site-built-here {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.site-built-here p {
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+@media (max-width: 800px) {
+  .about-grid,
+  .credential-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .education-item,
+  .project-heading {
+    flex-direction: column;
+  }
+
+  .quick-facts div {
+    flex-direction: column;
+    gap: 2px;
+  }
+}

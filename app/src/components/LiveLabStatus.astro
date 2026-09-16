@@ -1,0 +1,568 @@
+<div class="live-status" id="live-lab-status">
+
+  <div class="live-header">
+    <div>
+      <div class="live-kicker">LIVE INFRASTRUCTURE</div>
+      <h3>Rock Solid Labs Status</h3>
+      <p>
+        Real-time health from selected homelab infrastructure and
+        Project Orange services.
+      </p>
+    </div>
+
+    <div class="overall loading" id="lab-overall">
+      <span class="dot"></span>
+      <span>Connecting...</span>
+    </div>
+  </div>
+
+  <div
+    class="status-groups"
+    id="lab-status-groups"
+    aria-live="polite"
+  >
+    <div class="loading-message">
+      Retrieving live infrastructure status...
+    </div>
+  </div>
+
+  <div class="live-footer">
+    <span id="lab-status-updated">Live data via Uptime Kuma</span>
+    <span>24-hour uptime · recent heartbeat history</span>
+  </div>
+
+</div>
+
+<script>
+  const root = document.querySelector('#live-lab-status');
+
+  if (root && !root.dataset.initialized) {
+    root.dataset.initialized = 'true';
+
+    const groupsRoot =
+      root.querySelector('#lab-status-groups');
+
+    const overall =
+      root.querySelector('#lab-overall');
+
+    const updated =
+      root.querySelector('#lab-status-updated');
+
+    function state(status) {
+      if (status === 1) {
+        return { label: 'Operational', css: 'up' };
+      }
+
+      if (status === 0) {
+        return { label: 'Offline', css: 'down' };
+      }
+
+      if (status === 3) {
+        return { label: 'Maintenance', css: 'maintenance' };
+      }
+
+      return { label: 'Checking', css: 'pending' };
+    }
+
+    function badgeClass(groupName) {
+      const name = groupName.toLowerCase();
+
+      if (name.includes('orange')) return 'orange';
+      if (name.includes('core')) return 'core';
+      if (name.includes('web')) return 'web';
+
+      return 'default';
+    }
+
+    function monitorRow(groupName, monitor, heartbeats) {
+      const history =
+        heartbeats.heartbeatList[String(monitor.id)] || [];
+
+      const latest = history[history.length - 1];
+      const current = state(latest?.status);
+
+      const uptimeValue =
+        heartbeats.uptimeList[`${monitor.id}_24`];
+
+      const uptime =
+        typeof uptimeValue === 'number'
+          ? `${(uptimeValue * 100).toFixed(
+              uptimeValue === 1 ? 0 : 2
+            )}%`
+          : '—';
+
+      const row = document.createElement('div');
+      row.className = 'status-row';
+
+      const details = document.createElement('div');
+      details.className = 'status-details';
+
+      const percent = document.createElement('span');
+      percent.className = `uptime ${current.css}`;
+      percent.textContent = uptime;
+
+      const service = document.createElement('div');
+      service.className = 'service';
+
+      const serviceName = document.createElement('strong');
+      serviceName.textContent = monitor.name;
+
+      const badge = document.createElement('span');
+      badge.className =
+        `badge ${badgeClass(groupName)}`;
+      badge.textContent = groupName;
+
+      service.append(serviceName, badge);
+      details.append(percent, service);
+
+      const bars = document.createElement('div');
+      bars.className = 'heartbeat-bars';
+
+      history.slice(-28).forEach((beat) => {
+        const info = state(beat.status);
+
+        const bar = document.createElement('span');
+        bar.className = `heartbeat ${info.css}`;
+
+        bar.title =
+          `${info.label}` +
+          (typeof beat.ping === 'number'
+            ? ` · ${beat.ping} ms`
+            : '');
+
+        bars.appendChild(bar);
+      });
+
+      row.append(details, bars);
+
+      return {
+        row,
+        status: latest?.status
+      };
+    }
+
+    async function refreshStatus() {
+      try {
+        const [configResponse, heartbeatResponse] =
+          await Promise.all([
+            fetch('/api/lab-status/config', {
+              cache: 'no-store'
+            }),
+            fetch('/api/lab-status/heartbeat', {
+              cache: 'no-store'
+            })
+          ]);
+
+        if (!configResponse.ok || !heartbeatResponse.ok) {
+          throw new Error('Status endpoint unavailable');
+        }
+
+        const config = await configResponse.json();
+        const heartbeats = await heartbeatResponse.json();
+
+        groupsRoot.innerHTML = '';
+
+        const currentStatuses = [];
+
+        for (const group of config.publicGroupList || []) {
+
+          const groupSection =
+            document.createElement('div');
+
+          groupSection.className = 'status-group';
+
+          const groupHeader =
+            document.createElement('div');
+
+          groupHeader.className = 'group-header';
+
+          const title = document.createElement('h4');
+          title.textContent = group.name;
+
+          const count = document.createElement('span');
+          count.textContent =
+            `${group.monitorList.length} services`;
+
+          groupHeader.append(title, count);
+          groupSection.appendChild(groupHeader);
+
+          for (const monitor of group.monitorList) {
+
+            const result =
+              monitorRow(
+                group.name,
+                monitor,
+                heartbeats
+              );
+
+            groupSection.appendChild(result.row);
+            currentStatuses.push(result.status);
+          }
+
+          groupsRoot.appendChild(groupSection);
+        }
+
+        const allUp =
+          currentStatuses.length > 0 &&
+          currentStatuses.every(
+            (status) => status === 1
+          );
+
+        const anyDown =
+          currentStatuses.some(
+            (status) => status === 0
+          );
+
+        overall.className =
+          `overall ${
+            allUp
+              ? 'up'
+              : anyDown
+                ? 'down'
+                : 'pending'
+          }`;
+
+        overall.querySelector('span:last-child').textContent =
+          allUp
+            ? 'All Systems Operational'
+            : anyDown
+              ? 'Service Disruption'
+              : 'Status Updating';
+
+        updated.textContent =
+          `Updated ${new Date().toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit'
+          })}`;
+
+      } catch (error) {
+
+        groupsRoot.innerHTML =
+          '<div class="status-error">Live status is temporarily unavailable.</div>';
+
+        overall.className = 'overall pending';
+
+        overall.querySelector('span:last-child').textContent =
+          'Status Unavailable';
+
+        updated.textContent =
+          'Unable to reach monitoring service';
+      }
+    }
+
+    refreshStatus();
+
+    setInterval(refreshStatus, 60000);
+  }
+</script>
+
+<style is:global>
+  .live-status {
+    margin: 32px 0 48px;
+    border: 1px solid var(--border, #2c2c30);
+    border-radius: 18px;
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(255,122,0,.045),
+        transparent 38%
+      ),
+      #111114;
+  }
+
+  .live-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
+
+    padding: 28px 30px;
+    border-bottom: 1px solid var(--border, #2c2c30);
+  }
+
+  .live-kicker {
+    color: var(--orange, #ff7a00);
+    font-family: monospace;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+  }
+
+  .live-header h3 {
+    margin: 7px 0 5px;
+    font-size: 1.75rem;
+  }
+
+  .live-header p {
+    margin: 0;
+    color: var(--muted, #a6a6ad);
+  }
+
+  .overall {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    white-space: nowrap;
+
+    padding: 8px 12px;
+    border-radius: 999px;
+
+    border: 1px solid var(--border, #2c2c30);
+
+    font-family: monospace;
+    font-size: .75rem;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .overall.up {
+    color: #67e39b;
+    border-color: rgba(80,200,120,.28);
+    background: rgba(80,200,120,.08);
+  }
+
+  .overall.up .dot {
+    background: #50c878;
+    box-shadow: 0 0 12px rgba(80,200,120,.75);
+  }
+
+  .overall.down {
+    color: #ff8181;
+  }
+
+  .overall.down .dot {
+    background: #e85d5d;
+  }
+
+  .overall.pending,
+  .overall.loading {
+    color: #ffb566;
+  }
+
+  .overall.pending .dot,
+  .overall.loading .dot {
+    background: var(--orange, #ff7a00);
+  }
+
+  .status-groups {
+    padding: 3px 30px 22px;
+  }
+
+  .status-group {
+    margin-top: 25px;
+  }
+
+  .group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding-bottom: 10px;
+
+    border-bottom:
+      1px solid var(--border, #2c2c30);
+  }
+
+  .group-header h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .group-header span {
+    color: var(--muted, #a6a6ad);
+    font-family: monospace;
+    font-size: .75rem;
+  }
+
+  .status-row {
+    min-height: 64px;
+
+    display: grid;
+
+    grid-template-columns:
+      minmax(260px, 1fr)
+      auto;
+
+    gap: 25px;
+
+    align-items: center;
+
+    border-bottom:
+      1px solid rgba(255,255,255,.055);
+  }
+
+  .status-details {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 0;
+  }
+
+  .uptime {
+    min-width: 55px;
+
+    text-align: center;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    font-family: monospace;
+    font-size: .75rem;
+    font-weight: 800;
+  }
+
+  .uptime.up {
+    color: #07160d;
+    background: #59db8d;
+  }
+
+  .uptime.down {
+    color: white;
+    background: #d95555;
+  }
+
+  .uptime.pending,
+  .uptime.maintenance {
+    color: #111;
+    background: #e7a14c;
+  }
+
+  .service strong {
+    display: block;
+    font-size: .96rem;
+  }
+
+  .badge {
+    display: inline-flex;
+
+    margin-top: 5px;
+
+    padding: 3px 8px;
+
+    border-radius: 999px;
+
+    font-size: .67rem;
+    font-weight: 700;
+  }
+
+  .badge.orange {
+    color: #17100a;
+    background: var(--orange, #ff7a00);
+  }
+
+  .badge.core {
+    color: #dedee4;
+
+    border: 1px solid #45454d;
+    background: #242429;
+  }
+
+  .badge.web,
+  .badge.default {
+    color: #ffc18a;
+
+    border:
+      1px solid rgba(255,122,0,.3);
+
+    background:
+      rgba(255,122,0,.1);
+  }
+
+  .heartbeat-bars {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 4px;
+  }
+
+  .heartbeat {
+    width: 5px;
+    height: 19px;
+
+    display: block;
+
+    border-radius: 999px;
+
+    background: #38383f;
+  }
+
+  .heartbeat.up {
+    background: #59dc8f;
+  }
+
+  .heartbeat.down {
+    background: #e45e5e;
+  }
+
+  .heartbeat.pending,
+  .heartbeat.maintenance {
+    background: var(--orange, #ff7a00);
+  }
+
+  .live-footer {
+    display: flex;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 14px 30px;
+
+    border-top:
+      1px solid var(--border, #2c2c30);
+
+    color: var(--muted, #a6a6ad);
+
+    font-family: monospace;
+    font-size: .73rem;
+  }
+
+  .loading-message,
+  .status-error {
+    padding: 35px 0;
+    color: var(--muted, #a6a6ad);
+  }
+
+  @media (max-width: 800px) {
+
+    .live-header,
+    .live-footer {
+      flex-direction: column;
+    }
+
+    .status-row {
+      grid-template-columns: 1fr;
+
+      gap: 12px;
+
+      padding: 15px 0;
+    }
+
+    .heartbeat-bars {
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+
+    .heartbeat {
+      flex: 1;
+      max-width: 6px;
+    }
+
+    .live-header,
+    .live-footer,
+    .status-groups {
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+  }
+</style>
