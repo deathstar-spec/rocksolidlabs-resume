@@ -76,13 +76,37 @@ const portArthurSteps = [
       content="Robert Peterson - IT Support, Infrastructure, Networking and Homelab Portfolio"
     />
     <title>Robert Peterson | Rock Solid Labs</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="/branding/rock-solid-labs-mark.png"
+    />
   </head>
 
   <body data-mode="recruiter">
     <header>
       <div class="container nav">
-        <a class="brand" href="#">
-          ROCK <span>SOLID</span> LABS
+        <a
+          class="brand brand-lockup"
+          href="#"
+          aria-label="Rock Solid Labs home"
+        >
+          <img
+            class="brand-mark"
+            src="/branding/rock-solid-labs-mark.png"
+            alt=""
+          />
+
+          <span class="brand-copy">
+            <span class="brand-name">
+              <span>ROCK SOLID</span>
+              <strong>LABS</strong>
+            </span>
+
+            <span class="brand-tagline">
+              INFRASTRUCTURE // SYSTEMS // LAB
+            </span>
+          </span>
         </a>
 
         <nav>
@@ -106,44 +130,71 @@ const portArthurSteps = [
     </header>
 
     <main>
-      <section class="hero">
-        <div class="container">
-          <div class="eyebrow">
-            IT Support · Infrastructure · Networking
+      <section class="hero branded-hero">
+        <div class="container hero-grid">
+
+          <div class="hero-content">
+            <div class="hero-brandline">
+              ROCK SOLID LABS // SELF-HOSTED PORTFOLIO
+            </div>
+
+            <div class="eyebrow">
+              IT Support · Infrastructure · Networking
+            </div>
+
+            <h1>Robert Peterson</h1>
+
+            <p class="hero-copy">
+              IT infrastructure professional with hands-on experience supporting
+              Windows environments, servers, Microsoft 365, networking, backups,
+              virtualization and business-critical systems — backed by more than
+              a decade of technology leadership experience.
+            </p>
+
+            <div class="actions">
+              <a class="button primary" href="#experience">
+                View Experience
+              </a>
+
+              <a class="button secondary lab-only" href="#projects">
+                Explore My Homelab
+              </a>
+
+              <a
+                class="button secondary"
+                href="https://www.linkedin.com/in/robert-peterson-kc"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LinkedIn
+              </a>
+            </div>
+
+            <div class="status lab-only">
+              <span class="status-dot"></span>
+              This site is self-hosted on Port Arthur · Proxmox · Docker
+            </div>
           </div>
 
-          <h1>Robert Peterson</h1>
+          <div class="hero-art" aria-hidden="true">
+            <div class="hero-art-ring"></div>
 
-          <p class="hero-copy">
-            IT infrastructure professional with hands-on experience supporting
-            Windows environments, servers, Microsoft 365, networking, backups,
-            virtualization and business-critical systems — backed by more than
-            a decade of technology leadership experience.
-          </p>
+            <img
+              class="hero-mark"
+              src="/branding/rock-solid-labs-mark.png"
+              alt=""
+            />
 
-          <div class="actions">
-            <a class="button primary" href="#experience">
-              View Experience
-            </a>
+            <div class="hero-art-caption">
+              BUILD <span>•</span> HOST <span>•</span> MONITOR
+            </div>
 
-            <a class="button secondary lab-only" href="#projects">
-              Explore My Homelab
-            </a>
-
-            <a
-              class="button secondary"
-              href="https://www.linkedin.com/in/robert-peterson-kc"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              LinkedIn
-            </a>
+            <div class="hero-lab-badge lab-only">
+              <span></span>
+              LAB ENVIRONMENT ACTIVE
+            </div>
           </div>
 
-          <div class="status lab-only">
-            <span class="status-dot"></span>
-            This site is self-hosted on Port Arthur · Proxmox · Docker
-          </div>
         </div>
       </section>
 
