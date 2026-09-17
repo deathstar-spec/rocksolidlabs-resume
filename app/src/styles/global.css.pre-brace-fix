@@ -1510,6 +1510,8 @@ body[data-mode="lab"] .branded-hero::after {
   body[data-mode="lab"] .hero-mark {
     transform: none;
   }
+}
+
 
 /* === HERO FOUR-ZONE FINAL === */
 
