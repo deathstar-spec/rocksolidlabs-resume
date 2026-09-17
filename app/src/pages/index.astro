@@ -109,13 +109,21 @@ const portArthurSteps = [
           </span>
         </a>
 
-        <nav>
-          <a href="#about">About</a>
-          <a href="#projects">Projects</a>
-          <a href="#experience">Experience</a>
-          <a href="#skills">Skills</a>
-          <a href="#credentials">Credentials</a>
-          <a href="#contact">Contact</a>
+        <nav class="site-nav">
+
+          <div class="nav-links recruiter-nav">
+            <a href="#about">About</a>
+            <a href="#experience">Experience</a>
+            <a href="#skills">Skills</a>
+            <a href="#credentials">Credentials</a>
+            <a href="#contact">Contact</a>
+          </div>
+
+          <div class="nav-links lab-nav">
+            <a href="#live-lab-status">Live Status</a>
+            <a href="#lab-projects">Projects</a>
+            <a href="#contact">Contact</a>
+          </div>
 
           <button
             class="mode-button"
@@ -125,6 +133,7 @@ const portArthurSteps = [
           >
             Lab Mode
           </button>
+
         </nav>
       </div>
     </header>
@@ -156,7 +165,7 @@ const portArthurSteps = [
                 View Experience
               </a>
 
-              <a class="button secondary lab-only" href="#projects">
+              <a class="button secondary lab-only" href="#lab-projects">
                 Explore My Homelab
               </a>
 
@@ -198,7 +207,7 @@ const portArthurSteps = [
         </div>
       </section>
 
-      <section id="about">
+      <section id="about" class="recruiter-only">
         <div class="container">
           <div class="eyebrow">About</div>
 
@@ -254,7 +263,7 @@ const portArthurSteps = [
         </div>
       </section>
 
-      <section id="experience">
+      <section id="experience" class="recruiter-only">
         <div class="container">
           <div class="eyebrow">Experience</div>
 
@@ -383,7 +392,7 @@ const portArthurSteps = [
         </div>
       </section>
 
-      <section id="skills">
+      <section id="skills" class="recruiter-only">
         <div class="container">
           <div class="eyebrow">Technical Stack</div>
 
@@ -399,7 +408,7 @@ const portArthurSteps = [
         </div>
       </section>
 
-      <section id="credentials">
+      <section id="credentials" class="recruiter-only">
         <div class="container">
           <div class="eyebrow">Credentials</div>
 
@@ -449,10 +458,10 @@ const portArthurSteps = [
         </div>
       </section>
 
-      <section id="projects">
+      <section id="projects" class="lab-only">
         <div class="container">
           <LiveLabStatus />
-          <div class="eyebrow">Rock Solid Labs</div>
+          <div class="eyebrow" id="lab-projects">Rock Solid Labs</div>
 
           <h2 class="section-title">
             Built, broken, recovered and improved.
@@ -628,23 +637,79 @@ const portArthurSteps = [
     </footer>
 
     <script>
-      const button = document.querySelector('#mode-toggle');
+  const body = document.body;
+  const toggle = document.querySelector('#mode-toggle');
 
-      button?.addEventListener('click', () => {
-        const current = document.body.dataset.mode;
-        const labMode = current !== 'lab';
+  const heroExperienceLink =
+    document.querySelector('.hero a[href="#experience"]');
 
-        document.body.dataset.mode =
-          labMode ? 'lab' : 'recruiter';
+  function setMode(mode, options = {}) {
+    const isLab = mode === 'lab';
 
-        button.textContent =
-          labMode ? 'Recruiter Mode' : 'Lab Mode';
+    body.dataset.mode = isLab ? 'lab' : 'recruiter';
 
-        button.setAttribute(
-          'aria-pressed',
-          String(labMode)
-        );
+    toggle.textContent =
+      isLab ? 'Recruiter Mode' : 'Lab Mode';
+
+    toggle.setAttribute(
+      'aria-pressed',
+      String(isLab)
+    );
+
+    try {
+      localStorage.setItem(
+        'rock-solid-labs-mode',
+        body.dataset.mode
+      );
+    } catch {}
+
+    if (options.scrollTo) {
+      requestAnimationFrame(() => {
+        const destination =
+          document.querySelector(options.scrollTo);
+
+        if (destination) {
+          destination.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
       });
-    </script>
+    }
+  }
+
+  toggle?.addEventListener('click', () => {
+    const nextMode =
+      body.dataset.mode === 'lab'
+        ? 'recruiter'
+        : 'lab';
+
+    setMode(nextMode);
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  heroExperienceLink?.addEventListener(
+    'click',
+    (event) => {
+      if (body.dataset.mode !== 'lab') return;
+
+      event.preventDefault();
+
+      setMode('recruiter', {
+        scrollTo: '#experience'
+      });
+    }
+  );
+
+  /*
+   * Recruiter Mode remains the default whenever
+   * someone first opens the portfolio.
+   */
+  setMode('recruiter');
+</script>
   </body>
 </html>
