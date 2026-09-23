@@ -1763,3 +1763,18 @@ body[data-mode="lab"] .branded-hero::after {
   }
 }
 
+
+/* === HERO BUTTON TEXT POLISH === */
+
+@media (min-width: 821px) {
+  .recruiter-hero .actions .button,
+  .lab-hero .actions .button {
+    width: 172px !important;
+    min-width: 172px !important;
+
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+
+    white-space: nowrap !important;
+  }
+}
