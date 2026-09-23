@@ -355,6 +355,485 @@
 </script>
 
 
+
+<!-- LIVE ARCHITECTURE HEALTH -->
+<script>
+  (() => {
+    const CONFIG_URL = "/api/lab-status/config";
+    const HEARTBEAT_URL = "/api/lab-status/heartbeat";
+    const POLL_INTERVAL = 60000;
+
+    let healthState = {};
+
+    const neutralNodes = [
+      "portarthur",
+      "app-vms",
+      "resume"
+    ];
+
+    function normalize(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function getLatestBeat(heartbeatData, id) {
+      const list =
+        heartbeatData?.heartbeatList?.[String(id)] ||
+        heartbeatData?.heartbeatList?.[id] ||
+        [];
+
+      if (!Array.isArray(list) || !list.length) {
+        return null;
+      }
+
+      return list[list.length - 1];
+    }
+
+    function calculateState(ids, heartbeatData) {
+      const validIds = ids.filter(
+        (id) => id !== null && id !== undefined
+      );
+
+      if (!validIds.length) {
+        return {
+          state: "neutral",
+          healthy: 0,
+          total: 0,
+          uptime: null
+        };
+      }
+
+      let healthy = 0;
+      let known = 0;
+
+      const uptimes = [];
+
+      validIds.forEach((id) => {
+        const beat = getLatestBeat(heartbeatData, id);
+
+        if (beat) {
+          known += 1;
+
+          if (Number(beat.status) === 1) {
+            healthy += 1;
+          }
+        }
+
+        const uptime =
+          heartbeatData?.uptimeList?.[`${id}_24`];
+
+        if (typeof uptime === "number") {
+          uptimes.push(uptime);
+        }
+      });
+
+      let state = "unknown";
+
+      if (known === validIds.length && healthy === validIds.length) {
+        state = "healthy";
+      } else if (known > 0 && healthy === 0) {
+        state = "offline";
+      } else if (known > 0 && healthy < validIds.length) {
+        state = "degraded";
+      }
+
+      const uptime = uptimes.length
+        ? (
+            uptimes.reduce((sum, value) => sum + value, 0) /
+            uptimes.length *
+            100
+          )
+        : null;
+
+      return {
+        state,
+        healthy,
+        total: validIds.length,
+        uptime
+      };
+    }
+
+    function stateLabel(state) {
+      switch (state) {
+        case "healthy":
+          return "LIVE";
+        case "degraded":
+          return "DEGRADED";
+        case "offline":
+          return "DOWN";
+        case "unknown":
+          return "UNKNOWN";
+        default:
+          return "NOT MONITORED";
+      }
+    }
+
+    function ensureNodeBadge(node) {
+      let badge = node.querySelector(".live-node-status");
+
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "live-node-status";
+
+        badge.innerHTML = `
+          <span class="live-node-dot"></span>
+          <span class="live-node-label"></span>
+        `;
+
+        node.appendChild(badge);
+      }
+
+      return badge;
+    }
+
+    function renderNodeHealth(key, status) {
+      const node = document.querySelector(
+        `[data-node="${key}"]`
+      );
+
+      if (!node) return;
+
+      node.classList.remove(
+        "live-healthy",
+        "live-degraded",
+        "live-offline",
+        "live-unknown",
+        "live-neutral"
+      );
+
+      node.classList.add(`live-${status.state}`);
+
+      const badge = ensureNodeBadge(node);
+
+      badge.className =
+        `live-node-status live-node-status-${status.state}`;
+
+      const label =
+        badge.querySelector(".live-node-label");
+
+      if (label) {
+        label.textContent = stateLabel(status.state);
+      }
+    }
+
+    function ensureDetailHealthPanel() {
+      let panel =
+        document.querySelector("#architecture-live-detail");
+
+      if (panel) {
+        return panel;
+      }
+
+      const securityNote =
+        document.querySelector(
+          ".architecture-details .security-note"
+        );
+
+      const details =
+        document.querySelector(".architecture-details");
+
+      if (!details) {
+        return null;
+      }
+
+      panel = document.createElement("div");
+      panel.id = "architecture-live-detail";
+      panel.className = "detail-section architecture-live-detail";
+
+      panel.innerHTML = `
+        <label>LIVE MONITORING</label>
+
+        <div class="architecture-live-summary">
+          <div class="architecture-live-state">
+            <span class="architecture-live-dot"></span>
+            <strong id="architecture-live-label">
+              Checking...
+            </strong>
+          </div>
+
+          <span id="architecture-live-count"></span>
+        </div>
+
+        <div
+          id="architecture-live-meta"
+          class="architecture-live-meta"
+        >
+          Connecting to monitoring data...
+        </div>
+      `;
+
+      if (securityNote) {
+        securityNote.before(panel);
+      } else {
+        details.appendChild(panel);
+      }
+
+      return panel;
+    }
+
+    function updateDetailHealth(key) {
+      ensureDetailHealthPanel();
+
+      const status = healthState[key];
+
+      const panel =
+        document.querySelector("#architecture-live-detail");
+
+      const label =
+        document.querySelector("#architecture-live-label");
+
+      const count =
+        document.querySelector("#architecture-live-count");
+
+      const meta =
+        document.querySelector("#architecture-live-meta");
+
+      if (!panel || !label || !count || !meta) {
+        return;
+      }
+
+      panel.classList.remove(
+        "detail-health-healthy",
+        "detail-health-degraded",
+        "detail-health-offline",
+        "detail-health-unknown",
+        "detail-health-neutral"
+      );
+
+      if (!status) {
+        panel.classList.add("detail-health-unknown");
+
+        label.textContent = "Status unavailable";
+        count.textContent = "";
+        meta.textContent =
+          "Monitoring data has not loaded yet.";
+
+        return;
+      }
+
+      panel.classList.add(
+        `detail-health-${status.state}`
+      );
+
+      label.textContent = stateLabel(status.state);
+
+      if (status.total === 0) {
+        count.textContent =
+          "Not included in public monitoring";
+
+        meta.textContent =
+          "This system is intentionally shown without a live health state.";
+
+        return;
+      }
+
+      const noun =
+        status.total === 1 ? "monitor" : "monitors";
+
+      count.textContent =
+        `${status.healthy}/${status.total} ${noun} healthy`;
+
+      const uptimeText =
+        typeof status.uptime === "number"
+          ? `${status.uptime.toFixed(2)}% average 24h uptime`
+          : "24h uptime unavailable";
+
+      const checked =
+        new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit"
+        });
+
+      meta.textContent =
+        `${uptimeText} · Refreshed ${checked}`;
+    }
+
+    function updateActiveDetail() {
+      const active =
+        document.querySelector(
+          ".architecture-node.active[data-node]"
+        );
+
+      if (!active) return;
+
+      updateDetailHealth(
+        active.getAttribute("data-node")
+      );
+    }
+
+    async function refreshHealth() {
+      try {
+        const [configResponse, heartbeatResponse] =
+          await Promise.all([
+            fetch(CONFIG_URL, { cache: "no-store" }),
+            fetch(HEARTBEAT_URL, { cache: "no-store" })
+          ]);
+
+        if (
+          !configResponse.ok ||
+          !heartbeatResponse.ok
+        ) {
+          throw new Error(
+            "Monitoring endpoint returned an error."
+          );
+        }
+
+        const configData =
+          await configResponse.json();
+
+        const heartbeatData =
+          await heartbeatResponse.json();
+
+        const groups =
+          configData?.publicGroupList || [];
+
+        const allMonitors =
+          groups.flatMap(
+            (group) => group.monitorList || []
+          );
+
+        const findMonitorId = (name) => {
+          const monitor =
+            allMonitors.find(
+              (item) =>
+                normalize(item.name) ===
+                normalize(name)
+            );
+
+          return monitor?.id;
+        };
+
+        const projectOrange =
+          groups.find(
+            (group) =>
+              normalize(group.name) ===
+              "project orange"
+          );
+
+        const allIds =
+          allMonitors.map((monitor) => monitor.id);
+
+        const projectOrangeIds =
+          (projectOrange?.monitorList || [])
+            .map((monitor) => monitor.id);
+
+        const mappings = {
+          rsl: allIds,
+
+          orangebox: [
+            findMonitorId("Proxmox")
+          ],
+
+          truenas: [
+            findMonitorId("TrueNAS")
+          ],
+
+          core: [
+            findMonitorId("Pi-Hole"),
+            findMonitorId("Plex")
+          ],
+
+          "project-orange":
+            projectOrangeIds
+        };
+
+        healthState = {};
+
+        Object.entries(mappings).forEach(
+          ([key, ids]) => {
+            healthState[key] =
+              calculateState(ids, heartbeatData);
+          }
+        );
+
+        neutralNodes.forEach((key) => {
+          healthState[key] = {
+            state: "neutral",
+            healthy: 0,
+            total: 0,
+            uptime: null
+          };
+        });
+
+        Object.entries(healthState).forEach(
+          ([key, status]) => {
+            renderNodeHealth(key, status);
+          }
+        );
+
+        updateActiveDetail();
+      } catch (error) {
+        console.error(
+          "Rock Solid Labs live architecture status failed:",
+          error
+        );
+
+        [
+          "rsl",
+          "orangebox",
+          "truenas",
+          "core",
+          "project-orange"
+        ].forEach((key) => {
+          healthState[key] = {
+            state: "unknown",
+            healthy: 0,
+            total: 0,
+            uptime: null
+          };
+
+          renderNodeHealth(
+            key,
+            healthState[key]
+          );
+        });
+
+        neutralNodes.forEach((key) => {
+          healthState[key] = {
+            state: "neutral",
+            healthy: 0,
+            total: 0,
+            uptime: null
+          };
+
+          renderNodeHealth(
+            key,
+            healthState[key]
+          );
+        });
+
+        updateActiveDetail();
+      }
+    }
+
+    document
+      .querySelectorAll(
+        ".architecture-node[data-node]"
+      )
+      .forEach((node) => {
+        node.addEventListener("click", () => {
+          const key =
+            node.getAttribute("data-node");
+
+          setTimeout(
+            () => updateDetailHealth(key),
+            0
+          );
+        });
+      });
+
+    ensureDetailHealthPanel();
+
+    refreshHealth();
+
+    window.setInterval(
+      refreshHealth,
+      POLL_INTERVAL
+    );
+  })();
+</script>
+
+
 <style>
   .architecture {
     width: min(1120px, calc(100% - 40px));
@@ -766,3 +1245,219 @@
     }
   }
 </style>
+
+
+<style is:global>
+  /*
+   * LIVE ARCHITECTURE HEALTH
+   * Global because badges/status elements are created by JS.
+   */
+
+  .architecture-node > i {
+    display: none !important;
+  }
+
+  .live-node-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 7px;
+
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 999px;
+
+    background: rgba(0,0,0,.34);
+
+    font-size: .48rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+
+    pointer-events: none;
+  }
+
+  .live-node-dot {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #777780;
+  }
+
+  .live-node-status-healthy {
+    color: #70e6a0;
+    border-color: rgba(74,222,128,.20);
+  }
+
+  .live-node-status-healthy .live-node-dot {
+    background: #4ade80;
+
+    box-shadow:
+      0 0 8px rgba(74,222,128,.65);
+  }
+
+  .live-node-status-degraded {
+    color: #ffbd66;
+    border-color: rgba(255,170,65,.22);
+  }
+
+  .live-node-status-degraded .live-node-dot {
+    background: #ffad42;
+
+    box-shadow:
+      0 0 8px rgba(255,173,66,.55);
+  }
+
+  .live-node-status-offline {
+    color: #ff7777;
+    border-color: rgba(255,90,90,.22);
+  }
+
+  .live-node-status-offline .live-node-dot {
+    background: #ff5f5f;
+
+    box-shadow:
+      0 0 8px rgba(255,95,95,.55);
+  }
+
+  .live-node-status-unknown {
+    color: #a4a4ad;
+  }
+
+  .live-node-status-neutral {
+    color: #777780;
+  }
+
+  .architecture-node.live-healthy {
+    box-shadow:
+      inset 0 0 0 1px rgba(74,222,128,.025);
+  }
+
+  .architecture-node.live-degraded {
+    border-color: rgba(255,173,66,.34);
+  }
+
+  .architecture-node.live-offline {
+    border-color: rgba(255,95,95,.36);
+  }
+
+  .architecture-live-detail {
+    transition:
+      border-color .2s ease,
+      opacity .2s ease;
+  }
+
+  .architecture-live-summary {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 16px;
+
+    color: #97979f;
+
+    font-size: .69rem;
+  }
+
+  .architecture-live-state {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+  }
+
+  .architecture-live-state strong {
+    color: #aaaab2;
+
+    font-size: .68rem;
+
+    letter-spacing: .06em;
+  }
+
+  .architecture-live-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #777780;
+  }
+
+  .architecture-live-meta {
+    margin-top: 9px;
+
+    color: #686870;
+
+    font-size: .62rem;
+
+    line-height: 1.5;
+  }
+
+  .detail-health-healthy
+    .architecture-live-dot {
+    background: #4ade80;
+
+    box-shadow:
+      0 0 10px rgba(74,222,128,.65);
+  }
+
+  .detail-health-healthy
+    .architecture-live-state strong {
+    color: #70e6a0;
+  }
+
+  .detail-health-degraded
+    .architecture-live-dot {
+    background: #ffad42;
+
+    box-shadow:
+      0 0 10px rgba(255,173,66,.55);
+  }
+
+  .detail-health-degraded
+    .architecture-live-state strong {
+    color: #ffbd66;
+  }
+
+  .detail-health-offline
+    .architecture-live-dot {
+    background: #ff5f5f;
+
+    box-shadow:
+      0 0 10px rgba(255,95,95,.55);
+  }
+
+  .detail-health-offline
+    .architecture-live-state strong {
+    color: #ff7777;
+  }
+
+  .detail-health-neutral
+    .architecture-live-state strong,
+  .detail-health-unknown
+    .architecture-live-state strong {
+    color: #898991;
+  }
+
+  @media (max-width: 700px) {
+    .live-node-status {
+      top: 8px;
+      right: 8px;
+    }
+
+    .architecture-live-summary {
+      align-items: flex-start;
+      flex-direction: column;
+
+      gap: 8px;
+    }
+  }
+</style>
+
