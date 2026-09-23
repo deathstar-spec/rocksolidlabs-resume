@@ -104,7 +104,6 @@
       contact: runContact,
       orangebox: runOrangeBox,
       portarthur: runPortArthur,
-      neofetch: runNeofetch,
       clear: runClear
     };
 
@@ -328,10 +327,6 @@
       appendLine("");
       appendLine(
         "Tip: ↑ and ↓ navigate command history.",
-        "terminal-muted"
-      );
-      appendLine(
-        "Try breaking it. You won't.",
         "terminal-muted"
       );
       appendLine("");
@@ -644,69 +639,6 @@
       appendLine("");
     }
 
-    function runNeofetch() {
-      appendLine("");
-
-      appendLine(
-        "        /\\        visitor@rocksolidlabs",
-        "terminal-orange"
-      );
-      appendLine(
-        "       /  \\       ----------------------",
-        "terminal-orange"
-      );
-      appendLine(
-        "      / /\\ \\      Platform: Rock Solid Labs",
-        "terminal-orange"
-      );
-      appendLine(
-        "     / /  \\ \\     Environment: Self-hosted Homelab",
-        "terminal-orange"
-      );
-      appendLine(
-        "    /_/____\\_\\    Hypervisor: Proxmox VE",
-        "terminal-orange"
-      );
-
-      appendStatus(
-        "Hosts",
-        "OrangeBox · Port Arthur"
-      );
-
-      appendStatus(
-        "Containers",
-        "Docker · Docker Compose"
-      );
-
-      appendStatus(
-        "Storage",
-        "TrueNAS SCALE"
-      );
-
-      appendStatus(
-        "Monitoring",
-        "Uptime Kuma"
-      );
-
-      appendStatus(
-        "Web Stack",
-        "Astro · Nginx"
-      );
-
-      appendStatus(
-        "Security",
-        "Sandboxed · Read Only",
-        "healthy"
-      );
-
-      appendLine("");
-      appendLine(
-        "You found a command that wasn't in help. Nice.",
-        "terminal-muted"
-      );
-      appendLine("");
-    }
-
     function runClear() {
       output.replaceChildren();
     }
@@ -823,7 +755,7 @@
 <style is:global>
   .lab-terminal {
     width: min(1120px, calc(100% - 40px));
-    margin: 54px auto 30px;
+    margin: 90px auto 30px;
   }
 
   .lab-terminal-heading {
@@ -1179,7 +1111,7 @@
   @media (max-width: 700px) {
     .lab-terminal {
       width: calc(100% - 28px);
-      margin-top: 42px;
+      margin-top: 60px;
     }
 
     .lab-terminal-heading {
