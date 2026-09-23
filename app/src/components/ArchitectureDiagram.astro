@@ -1,0 +1,768 @@
+<section id="architecture" class="architecture lab-only">
+  <div class="architecture-heading">
+    <div>
+      <div class="architecture-eyebrow">SYSTEM MAP</div>
+      <h2>Rock Solid Labs Architecture</h2>
+      <p>
+        A sanitized view of the infrastructure behind Rock Solid Labs.
+        Select a system to explore what it does and the technologies behind it.
+      </p>
+    </div>
+
+    <div class="architecture-badge">
+      <span></span>
+      PUBLIC VIEW
+    </div>
+  </div>
+
+  <div class="architecture-shell">
+
+    <div class="architecture-map">
+
+      <div class="root-row">
+        <button
+          class="architecture-node root-node active"
+          data-node="rsl"
+          type="button"
+        >
+          <small>HOMELAB PLATFORM</small>
+          <strong>Rock Solid Labs</strong>
+          <span>Infrastructure Environment</span>
+        </button>
+      </div>
+
+      <div class="root-line"></div>
+
+      <div class="host-grid">
+
+        <div class="host-column">
+          <div class="host-line"></div>
+
+          <button
+            class="architecture-node host-node"
+            data-node="orangebox"
+            type="button"
+          >
+            <i></i>
+            <small>PRIMARY HOST</small>
+            <strong>OrangeBox</strong>
+            <span>Proxmox VE</span>
+          </button>
+
+          <div class="child-line"></div>
+
+          <div class="child-grid">
+
+            <button
+              class="architecture-node child-node"
+              data-node="truenas"
+              type="button"
+            >
+              <small>STORAGE</small>
+              <strong>TrueNAS</strong>
+              <span>Shared Storage</span>
+            </button>
+
+            <button
+              class="architecture-node child-node"
+              data-node="core"
+              type="button"
+            >
+              <small>CORE SERVICES</small>
+              <strong>Infrastructure</strong>
+              <span>DNS · VPN · Media</span>
+            </button>
+
+            <button
+              class="architecture-node child-node orange-node"
+              data-node="project-orange"
+              type="button"
+            >
+              <small>DOCKER PLATFORM</small>
+              <strong>Project Orange</strong>
+              <span>Containers · Monitoring</span>
+            </button>
+
+          </div>
+        </div>
+
+
+        <div class="host-column">
+          <div class="host-line"></div>
+
+          <button
+            class="architecture-node host-node"
+            data-node="portarthur"
+            type="button"
+          >
+            <i></i>
+            <small>APPLICATION HOST</small>
+            <strong>Port Arthur</strong>
+            <span>Proxmox VE</span>
+          </button>
+
+          <div class="child-line"></div>
+
+          <div class="child-grid">
+
+            <button
+              class="architecture-node child-node"
+              data-node="app-vms"
+              type="button"
+            >
+              <small>WORKLOADS</small>
+              <strong>Application VMs</strong>
+              <span>Ubuntu · Docker</span>
+            </button>
+
+            <button
+              class="architecture-node child-node orange-node"
+              data-node="resume"
+              type="button"
+            >
+              <small>WEB PLATFORM</small>
+              <strong>resume-web</strong>
+              <span>Astro · Nginx · Docker</span>
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <aside class="architecture-details">
+
+      <div class="details-top">
+        <div>
+          <small id="detail-kind">HOMELAB PLATFORM</small>
+          <h3 id="detail-title">Rock Solid Labs</h3>
+        </div>
+
+        <div class="selected-indicator">
+          <span></span>
+          SELECTED
+        </div>
+      </div>
+
+      <p id="detail-description">
+        A multi-host self-hosted environment used to build, operate,
+        troubleshoot and recover real infrastructure services.
+      </p>
+
+      <div class="detail-section">
+        <label>TECHNOLOGIES</label>
+
+        <div id="detail-tags" class="detail-tags">
+          <span>Proxmox VE</span>
+          <span>Linux</span>
+          <span>Docker</span>
+          <span>Networking</span>
+          <span>Storage</span>
+          <span>Monitoring</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <label>WHAT IT DEMONSTRATES</label>
+
+        <p id="detail-demo">
+          Practical infrastructure design, virtualization, service isolation,
+          storage integration, monitoring and recovery.
+        </p>
+      </div>
+
+      <div class="security-note">
+        <b>◈</b>
+        Private addressing, management endpoints and sensitive configuration
+        are intentionally omitted.
+      </div>
+
+    </aside>
+
+  </div>
+</section>
+
+
+<script>
+  const data = {
+    rsl: {
+      kind: "HOMELAB PLATFORM",
+      title: "Rock Solid Labs",
+      description:
+        "A multi-host self-hosted environment used to build, operate, troubleshoot and recover real infrastructure services.",
+      tags: [
+        "Proxmox VE",
+        "Linux",
+        "Docker",
+        "Networking",
+        "Storage",
+        "Monitoring"
+      ],
+      demo:
+        "Practical infrastructure design, virtualization, service isolation, storage integration, monitoring and recovery."
+    },
+
+    orangebox: {
+      kind: "PRIMARY VIRTUALIZATION HOST",
+      title: "OrangeBox",
+      description:
+        "The primary infrastructure platform supporting storage, network services, media services and containerized workloads.",
+      tags: [
+        "Proxmox VE",
+        "Linux",
+        "LXC",
+        "Virtual Machines",
+        "SMB/CIFS"
+      ],
+      demo:
+        "Hypervisor administration, Linux operations, service dependencies, storage integration and infrastructure recovery."
+    },
+
+    truenas: {
+      kind: "CENTRALIZED STORAGE",
+      title: "TrueNAS",
+      description:
+        "Centralized network storage providing persistent datasets and shared storage to multiple systems throughout the lab.",
+      tags: [
+        "TrueNAS SCALE",
+        "SMB",
+        "CIFS",
+        "Datasets",
+        "Network Storage"
+      ],
+      demo:
+        "Storage administration, network shares, persistent mounts and recovery from storage-related failures."
+    },
+
+    core: {
+      kind: "CORE INFRASTRUCTURE",
+      title: "Core Services",
+      description:
+        "Always-on infrastructure services providing DNS filtering, secure remote access, media delivery and automation.",
+      tags: [
+        "Pi-hole",
+        "WireGuard",
+        "Plex",
+        "Home Assistant",
+        "DNS",
+        "Linux"
+      ],
+      demo:
+        "DNS troubleshooting, secure remote connectivity, service management and dependency troubleshooting."
+    },
+
+    "project-orange": {
+      kind: "DOCKER APPLICATION PLATFORM",
+      title: "Project Orange",
+      description:
+        "An Ubuntu Docker environment hosting containerized applications, selected VPN-routed services, automation and monitoring.",
+      tags: [
+        "Docker",
+        "Docker Compose",
+        "Gluetun",
+        "Uptime Kuma",
+        "Nginx",
+        "Cloudflare"
+      ],
+      demo:
+        "Container networking, Compose orchestration, VPN routing, persistent storage and application recovery."
+    },
+
+    portarthur: {
+      kind: "APPLICATION VIRTUALIZATION HOST",
+      title: "Port Arthur",
+      description:
+        "A separate virtualization host designed to isolate application and public-facing workloads from the primary lab environment.",
+      tags: [
+        "Proxmox VE",
+        "Ubuntu Server",
+        "QEMU",
+        "Docker",
+        "Workload Isolation"
+      ],
+      demo:
+        "Workload segmentation, virtualization, Linux administration and separation between hypervisor and application services."
+    },
+
+    "app-vms": {
+      kind: "ISOLATED APPLICATION WORKLOADS",
+      title: "Application VMs",
+      description:
+        "Dedicated Ubuntu virtual machines isolate application workloads from the hypervisor and from unrelated services.",
+      tags: [
+        "Ubuntu Server",
+        "Virtual Machines",
+        "Docker Engine",
+        "Compose",
+        "QEMU Guest Agent"
+      ],
+      demo:
+        "VM lifecycle management, Linux administration, application isolation and cleaner failure boundaries."
+    },
+
+    resume: {
+      kind: "PUBLIC WEB PLATFORM",
+      title: "resume-web",
+      description:
+        "A dedicated application VM hosting this Rock Solid Labs portfolio and its supporting web stack.",
+      tags: [
+        "Astro",
+        "Nginx",
+        "Docker",
+        "Git",
+        "JavaScript",
+        "CSS"
+      ],
+      demo:
+        "Building and operating a complete self-hosted web application from source control through containerized deployment."
+    }
+  };
+
+  const nodes = document.querySelectorAll(".architecture-node");
+
+  const kind = document.querySelector("#detail-kind");
+  const title = document.querySelector("#detail-title");
+  const description = document.querySelector("#detail-description");
+  const tags = document.querySelector("#detail-tags");
+  const demo = document.querySelector("#detail-demo");
+
+  nodes.forEach((node) => {
+    node.addEventListener("click", () => {
+      const key = node.getAttribute("data-node");
+      const item = data[key];
+
+      if (!item) return;
+
+      nodes.forEach((n) => n.classList.remove("active"));
+      node.classList.add("active");
+
+      kind.textContent = item.kind;
+      title.textContent = item.title;
+      description.textContent = item.description;
+      demo.textContent = item.demo;
+
+      tags.innerHTML = "";
+
+      item.tags.forEach((tag) => {
+        const el = document.createElement("span");
+        el.textContent = tag;
+        tags.appendChild(el);
+      });
+    });
+  });
+</script>
+
+
+<style>
+  .architecture {
+    width: min(1120px, calc(100% - 40px));
+    margin: 90px auto 30px;
+  }
+
+  .architecture-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 40px;
+    margin-bottom: 26px;
+  }
+
+  .architecture-eyebrow {
+    margin-bottom: 8px;
+    color: #ff7a00;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+  }
+
+  .architecture-heading h2 {
+    margin: 0;
+    color: #f5f5f5;
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+    letter-spacing: -.035em;
+  }
+
+  .architecture-heading p {
+    max-width: 680px;
+    margin: 12px 0 0;
+    color: #92929b;
+    line-height: 1.65;
+  }
+
+  .architecture-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,122,0,.22);
+    border-radius: 999px;
+    background: rgba(255,122,0,.04);
+    color: #aaaab1;
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+
+  .architecture-badge span,
+  .host-node i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 10px rgba(74,222,128,.55);
+  }
+
+  .architecture-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, .75fr);
+    gap: 22px;
+  }
+
+  .architecture-map,
+  .architecture-details {
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    background: #0d0d0f;
+  }
+
+  .architecture-map {
+    position: relative;
+    overflow: hidden;
+    padding: 38px 30px 32px;
+    min-height: 610px;
+  }
+
+  .architecture-map::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .28;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .architecture-map::after {
+    content: "";
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    width: 470px;
+    height: 470px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    background:
+      radial-gradient(circle, rgba(255,122,0,.12), transparent 68%);
+  }
+
+  .root-row {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+  }
+
+  .architecture-node {
+    position: relative;
+    z-index: 3;
+    appearance: none;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 12px;
+    background: #121216;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform .18s ease,
+      border-color .18s ease,
+      background .18s ease,
+      box-shadow .18s ease;
+  }
+
+  .architecture-node:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,122,0,.42);
+  }
+
+  .architecture-node.active {
+    border-color: rgba(255,122,0,.72);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255,122,0,.10),
+        rgba(255,122,0,.025)
+      ),
+      #121216;
+
+    box-shadow:
+      0 0 0 1px rgba(255,122,0,.06),
+      0 18px 38px rgba(0,0,0,.25),
+      0 0 26px rgba(255,122,0,.07);
+  }
+
+  .architecture-node small {
+    display: block;
+    color: #ff7a00;
+    font-size: .57rem;
+    font-weight: 800;
+    letter-spacing: .13em;
+  }
+
+  .architecture-node strong {
+    display: block;
+    margin-top: 5px;
+    color: #f4f4f5;
+    font-size: 1rem;
+  }
+
+  .architecture-node > span {
+    display: block;
+    margin-top: 5px;
+    color: #7e7e87;
+    font-size: .7rem;
+  }
+
+  .root-node {
+    width: 250px;
+    padding: 16px 18px;
+  }
+
+  .root-node strong {
+    font-size: 1.1rem;
+  }
+
+  .root-line {
+    position: relative;
+    z-index: 2;
+    width: 1px;
+    height: 44px;
+    margin: 0 auto;
+    background: rgba(255,122,0,.45);
+  }
+
+  .host-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    padding-top: 24px;
+  }
+
+  .host-grid::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 1px;
+    background: rgba(255,122,0,.32);
+  }
+
+  .host-column {
+    position: relative;
+  }
+
+  .host-line {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    width: 1px;
+    height: 24px;
+    background: rgba(255,122,0,.32);
+  }
+
+  .host-node {
+    width: 100%;
+    padding: 18px;
+  }
+
+  .host-node i {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+
+  .child-line {
+    width: 1px;
+    height: 24px;
+    margin: auto;
+    background: rgba(255,255,255,.10);
+  }
+
+  .child-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .child-node {
+    width: 100%;
+    min-height: 88px;
+    padding: 14px;
+  }
+
+  .orange-node {
+    border-color: rgba(255,122,0,.18);
+  }
+
+  .architecture-details {
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+  }
+
+  .architecture-details::before {
+    content: "";
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 280px;
+    height: 280px;
+    background:
+      radial-gradient(circle, rgba(255,122,0,.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .details-top {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .details-top small {
+    color: #ff7a00;
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+  }
+
+  .details-top h3 {
+    margin: 7px 0 0;
+    color: #f5f5f5;
+    font-size: 1.55rem;
+  }
+
+  .selected-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #777780;
+    font-size: .56rem;
+    font-weight: 800;
+    letter-spacing: .09em;
+  }
+
+  .selected-indicator span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff7a00;
+    box-shadow: 0 0 9px rgba(255,122,0,.5);
+  }
+
+  #detail-description {
+    position: relative;
+    margin: 24px 0 0;
+    color: #aaaab2;
+    line-height: 1.7;
+  }
+
+  .detail-section {
+    position: relative;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+
+  .detail-section label {
+    display: block;
+    margin-bottom: 12px;
+    color: #71717a;
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+  }
+
+  .detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .detail-tags span {
+    padding: 6px 9px;
+    border: 1px solid rgba(255,122,0,.15);
+    border-radius: 7px;
+    background: rgba(255,122,0,.04);
+    color: #c1c1c7;
+    font-size: .67rem;
+  }
+
+  #detail-demo {
+    margin: 0;
+    color: #97979f;
+    line-height: 1.65;
+  }
+
+  .security-note {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    padding: 13px;
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 9px;
+    background: rgba(255,255,255,.015);
+    color: #6f6f77;
+    font-size: .64rem;
+    line-height: 1.5;
+  }
+
+  .security-note b {
+    color: #ff7a00;
+  }
+
+  @media (max-width: 980px) {
+    .architecture-shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .architecture {
+      width: calc(100% - 28px);
+      margin-top: 60px;
+    }
+
+    .architecture-heading {
+      display: block;
+    }
+
+    .architecture-badge {
+      width: fit-content;
+      margin-top: 18px;
+    }
+
+    .architecture-map {
+      min-height: 0;
+      padding: 28px 18px;
+    }
+
+    .root-line,
+    .host-grid::before,
+    .host-line {
+      display: none;
+    }
+
+    .host-grid {
+      grid-template-columns: 1fr;
+      padding-top: 22px;
+    }
+  }
+</style>
