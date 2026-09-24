@@ -136,22 +136,12 @@ const portArthurSteps = [
 
     <meta
       property="og:image"
-      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-social-card.png"
-    />
-
-    <meta
-      property="og:image:width"
-      content="1200"
-    />
-
-    <meta
-      property="og:image:height"
-      content="630"
+      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-mark.png"
     />
 
     <meta
       property="og:image:alt"
-      content="Robert Peterson - Rock Solid Labs IT Support and Infrastructure portfolio"
+      content="Rock Solid Labs logo"
     />
 
     <meta
@@ -162,7 +152,7 @@ const portArthurSteps = [
     <!-- Twitter / X -->
     <meta
       name="twitter:card"
-      content="summary_large_image"
+      content="summary"
     />
 
     <meta
@@ -177,7 +167,7 @@ const portArthurSteps = [
 
     <meta
       name="twitter:image"
-      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-social-card.png"
+      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-mark.png"
     />
   </head>
 

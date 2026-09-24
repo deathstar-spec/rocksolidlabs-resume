@@ -1,0 +1,10 @@
+services:
+  resume:
+    build:
+      context: ./app
+
+    container_name: rocksolidlabs-resume
+    restart: unless-stopped
+
+    ports:
+      - "8080:80"

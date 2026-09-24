@@ -72,112 +72,16 @@ const portArthurSteps = [
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1"
-    />
-
-    <title>
-      Robert Peterson | IT Support & Infrastructure
-    </title>
-
+    <meta name="viewport" content="width=device-width" />
     <meta
       name="description"
-      content="IT support and infrastructure professional specializing in Windows environments, networking, virtualization, systems administration, and self-hosted infrastructure."
+      content="Robert Peterson - IT Support, Infrastructure, Networking and Homelab Portfolio"
     />
-
-    <meta
-      name="robots"
-      content="index, follow"
-    />
-
-    <meta
-      name="theme-color"
-      content="#111214"
-    />
-
-    <link
-      rel="canonical"
-      href="https://resume.rocksolidlabs.net/"
-    />
-
+    <title>Robert Peterson | Rock Solid Labs</title>
     <link
       rel="icon"
       type="image/png"
       href="/branding/rock-solid-labs-mark.png"
-    />
-
-    <!-- Open Graph -->
-    <meta
-      property="og:type"
-      content="website"
-    />
-
-    <meta
-      property="og:site_name"
-      content="Rock Solid Labs"
-    />
-
-    <meta
-      property="og:title"
-      content="Robert Peterson | IT Support & Infrastructure"
-    />
-
-    <meta
-      property="og:description"
-      content="Explore Robert Peterson's IT infrastructure portfolio, professional experience, homelab architecture, live monitoring, virtualization, networking, and self-hosted projects."
-    />
-
-    <meta
-      property="og:url"
-      content="https://resume.rocksolidlabs.net/"
-    />
-
-    <meta
-      property="og:image"
-      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-social-card.png"
-    />
-
-    <meta
-      property="og:image:width"
-      content="1200"
-    />
-
-    <meta
-      property="og:image:height"
-      content="630"
-    />
-
-    <meta
-      property="og:image:alt"
-      content="Robert Peterson - Rock Solid Labs IT Support and Infrastructure portfolio"
-    />
-
-    <meta
-      property="og:locale"
-      content="en_US"
-    />
-
-    <!-- Twitter / X -->
-    <meta
-      name="twitter:card"
-      content="summary_large_image"
-    />
-
-    <meta
-      name="twitter:title"
-      content="Robert Peterson | IT Support & Infrastructure"
-    />
-
-    <meta
-      name="twitter:description"
-      content="IT infrastructure portfolio featuring virtualization, networking, Docker, monitoring, Windows systems, and self-hosted projects."
-    />
-
-    <meta
-      name="twitter:image"
-      content="https://resume.rocksolidlabs.net/branding/rock-solid-labs-social-card.png"
     />
   </head>
 
