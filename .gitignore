@@ -4,3 +4,9 @@ node_modules/
 dist/
 .DS_Store
 *.log
+
+# Local/manual backup files
+*.backup
+*.bak
+*.old
+*.pre-*
