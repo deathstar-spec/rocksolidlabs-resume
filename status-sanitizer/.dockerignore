@@ -1,0 +1,5 @@
+# Allow only runtime source and the build definition into this context.
+*
+!Dockerfile
+!server.mjs
+!sanitize.mjs

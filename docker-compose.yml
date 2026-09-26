@@ -5,6 +5,33 @@ services:
 
     container_name: rocksolidlabs-resume
     restart: unless-stopped
-
+    depends_on:
+      - status-sanitizer
+    networks:
+      - default
+      - monitoring-api
     ports:
       - "127.0.0.1:8080:80"
+
+  status-sanitizer:
+    build:
+      context: ./status-sanitizer
+    restart: unless-stopped
+    environment:
+      KUMA_ORIGIN: ${KUMA_ORIGIN:?Set KUMA_ORIGIN privately to the existing Kuma HTTP origin}
+    # No ports are published. Only resume shares the API network.
+    networks:
+      - monitoring-api
+      - monitoring-egress
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+
+networks:
+  monitoring-api:
+    internal: true
+  # Only the sanitizer joins this separate network, for outbound Kuma requests.
+  monitoring-egress: {}
