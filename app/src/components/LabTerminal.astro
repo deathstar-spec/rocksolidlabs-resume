@@ -80,6 +80,7 @@
 
 
 <script>
+  import { publicGroups, summarizeMonitors, stateLabel } from '../lib/monitoring.js';
   (() => {
     const root = document.querySelector("#lab-terminal");
     const output = document.querySelector("#terminal-output");
@@ -436,17 +437,11 @@
       };
     }
 
-    function latestHeartbeat(heartbeatData, id) {
-      const beats =
-        heartbeatData?.heartbeatList?.[String(id)] ||
-        heartbeatData?.heartbeatList?.[id] ||
-        [];
-
-      if (!Array.isArray(beats) || beats.length === 0) {
-        return null;
-      }
-
-      return beats[beats.length - 1];
+    function statusColor(state) {
+      if (state === "healthy") return "healthy";
+      if (state === "offline") return "danger";
+      if (state === "maintenance" || state === "degraded") return "warning";
+      return "neutral";
     }
 
     async function runStatus() {
@@ -462,50 +457,24 @@
         const { config, heartbeat } =
           await fetchMonitoring();
 
-        const groups =
-          config?.publicGroupList || [];
-
-        let total = 0;
-        let healthy = 0;
+        const groups = publicGroups(config);
+        const ids = groups.flatMap((group) => group.monitorList.map((monitor) => monitor.id));
 
         groups.forEach((group) => {
-          const monitors = group.monitorList || [];
-
-          let groupHealthy = 0;
-
-          monitors.forEach((monitor) => {
-            const beat =
-              latestHeartbeat(heartbeat, monitor.id);
-
-            total += 1;
-
-            if (beat && Number(beat.status) === 1) {
-              healthy += 1;
-              groupHealthy += 1;
-            }
-          });
-
-          const state =
-            groupHealthy === monitors.length &&
-            monitors.length > 0
-              ? "healthy"
-              : groupHealthy > 0
-                ? "warning"
-                : "danger";
-
+          const summary = summarizeMonitors(group.monitorList.map((monitor) => monitor.id), heartbeat);
           appendStatus(
             group.name,
-            `${groupHealthy}/${monitors.length} healthy`,
-            state
+            `${stateLabel(summary.state)} · ${summary.healthy}/${summary.total} healthy`,
+            statusColor(summary.state)
           );
         });
 
+        const summary = summarizeMonitors(ids, heartbeat);
         appendLine("");
-
         appendStatus(
           "Overall",
-          `${healthy}/${total} monitored services healthy`,
-          healthy === total ? "healthy" : "warning"
+          `${stateLabel(summary.state)} · ${summary.healthy}/${summary.total} monitored services healthy`,
+          statusColor(summary.state)
         );
 
         appendLine(
@@ -530,45 +499,19 @@
         const { config, heartbeat } =
           await fetchMonitoring();
 
-        const groups =
-          config?.publicGroupList || [];
+        const groups = publicGroups(config);
+        const ids = groups.flatMap((group) => group.monitorList.map((monitor) => monitor.id));
+        const summary = summarizeMonitors(ids, heartbeat);
 
-        const monitors =
-          groups.flatMap(
-            (group) => group.monitorList || []
-          );
-
-        const values = [];
-
-        monitors.forEach((monitor) => {
-          const value =
-            heartbeat?.uptimeList?.[`${monitor.id}_24`];
-
-          if (typeof value === "number") {
-            values.push(value * 100);
-          }
-        });
-
-        if (!values.length) {
-          appendLine(
-            "No uptime data is currently available.",
-            "terminal-muted"
-          );
+        if (summary.uptime === null) {
+          appendLine("No complete uptime data is currently available.", "terminal-muted");
         } else {
-          const average =
-            values.reduce((a, b) => a + b, 0) /
-            values.length;
-
           appendStatus(
             "Monitored Services",
-            `${average.toFixed(2)}% average uptime`,
-            average >= 99 ? "healthy" : "warning"
+            `${summary.uptime.toFixed(2)}% average uptime · ${stateLabel(summary.state)}`,
+            statusColor(summary.state)
           );
-
-          appendStatus(
-            "Coverage",
-            `${values.length} public monitors`
-          );
+          appendStatus("Coverage", `${summary.total} public monitors`);
         }
       } catch (error) {
         appendLine(
@@ -782,14 +725,14 @@
 
       renderMatrixFrame();
 
-      const interval =
-        window.setInterval(
-          renderMatrixFrame,
-          85
-        );
+      const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let interval;
+      let timeout;
 
-      window.setTimeout(() => {
+      function finishMatrix() {
         window.clearInterval(interval);
+        window.clearTimeout(timeout);
+        motionPreference.removeEventListener("change", onMotionChange);
 
         rows.forEach((row) => {
           row.style.opacity = "0.18";
@@ -808,7 +751,19 @@
         );
 
         appendLine("");
-      }, 5500);
+      }
+
+      function onMotionChange(event) {
+        if (event.matches) finishMatrix();
+      }
+
+      if (motionPreference.matches) {
+        finishMatrix();
+      } else {
+        interval = window.setInterval(renderMatrixFrame, 85);
+        timeout = window.setTimeout(finishMatrix, 5500);
+        motionPreference.addEventListener("change", onMotionChange);
+      }
     }
 
     function runClear() {
@@ -835,9 +790,11 @@
 
       const normalized = normalize(command);
 
-      const handler = commands[normalized];
+      const handler = Object.hasOwn(commands, normalized)
+        ? commands[normalized]
+        : undefined;
 
-      if (handler) {
+      if (typeof handler === "function") {
         handler();
         return;
       }

@@ -358,6 +358,7 @@
 
 <!-- LIVE ARCHITECTURE HEALTH -->
 <script>
+  import { publicGroups, summarizeMonitors, stateLabel } from '../lib/monitoring.js';
   (() => {
     const CONFIG_URL = "/api/lab-status/config";
     const HEARTBEAT_URL = "/api/lab-status/heartbeat";
@@ -373,98 +374,6 @@
 
     function normalize(value) {
       return String(value || "").trim().toLowerCase();
-    }
-
-    function getLatestBeat(heartbeatData, id) {
-      const list =
-        heartbeatData?.heartbeatList?.[String(id)] ||
-        heartbeatData?.heartbeatList?.[id] ||
-        [];
-
-      if (!Array.isArray(list) || !list.length) {
-        return null;
-      }
-
-      return list[list.length - 1];
-    }
-
-    function calculateState(ids, heartbeatData) {
-      const validIds = ids.filter(
-        (id) => id !== null && id !== undefined
-      );
-
-      if (!validIds.length) {
-        return {
-          state: "neutral",
-          healthy: 0,
-          total: 0,
-          uptime: null
-        };
-      }
-
-      let healthy = 0;
-      let known = 0;
-
-      const uptimes = [];
-
-      validIds.forEach((id) => {
-        const beat = getLatestBeat(heartbeatData, id);
-
-        if (beat) {
-          known += 1;
-
-          if (Number(beat.status) === 1) {
-            healthy += 1;
-          }
-        }
-
-        const uptime =
-          heartbeatData?.uptimeList?.[`${id}_24`];
-
-        if (typeof uptime === "number") {
-          uptimes.push(uptime);
-        }
-      });
-
-      let state = "unknown";
-
-      if (known === validIds.length && healthy === validIds.length) {
-        state = "healthy";
-      } else if (known > 0 && healthy === 0) {
-        state = "offline";
-      } else if (known > 0 && healthy < validIds.length) {
-        state = "degraded";
-      }
-
-      const uptime = uptimes.length
-        ? (
-            uptimes.reduce((sum, value) => sum + value, 0) /
-            uptimes.length *
-            100
-          )
-        : null;
-
-      return {
-        state,
-        healthy,
-        total: validIds.length,
-        uptime
-      };
-    }
-
-    function stateLabel(state) {
-      switch (state) {
-        case "healthy":
-          return "LIVE";
-        case "degraded":
-          return "DEGRADED";
-        case "offline":
-          return "DOWN";
-        case "unknown":
-          return "UNKNOWN";
-        default:
-          return "NOT MONITORED";
-      }
     }
 
     function ensureNodeBadge(node) {
@@ -496,6 +405,7 @@
         "live-healthy",
         "live-degraded",
         "live-offline",
+        "live-maintenance",
         "live-unknown",
         "live-neutral"
       );
@@ -595,6 +505,7 @@
         "detail-health-healthy",
         "detail-health-degraded",
         "detail-health-offline",
+        "detail-health-maintenance",
         "detail-health-unknown",
         "detail-health-neutral"
       );
@@ -616,13 +527,19 @@
 
       label.textContent = stateLabel(status.state);
 
-      if (status.total === 0) {
+      if (status.state === "neutral") {
         count.textContent =
           "Not included in public monitoring";
 
         meta.textContent =
           "This system is intentionally shown without a live health state.";
 
+        return;
+      }
+
+      if (status.state === "unknown") {
+        count.textContent = "Monitoring data unavailable or incomplete";
+        meta.textContent = "A current health state could not be determined.";
         return;
       }
 
@@ -685,7 +602,7 @@
           await heartbeatResponse.json();
 
         const groups =
-          configData?.publicGroupList || [];
+          publicGroups(configData);
 
         const allMonitors =
           groups.flatMap(
@@ -742,7 +659,7 @@
         Object.entries(mappings).forEach(
           ([key, ids]) => {
             healthState[key] =
-              calculateState(ids, heartbeatData);
+              summarizeMonitors(ids, heartbeatData);
           }
         );
 
@@ -1301,11 +1218,13 @@
       0 0 8px rgba(74,222,128,.65);
   }
 
+  .live-node-status-maintenance,
   .live-node-status-degraded {
     color: #ffbd66;
     border-color: rgba(255,170,65,.22);
   }
 
+  .live-node-status-maintenance .live-node-dot,
   .live-node-status-degraded .live-node-dot {
     background: #ffad42;
 
@@ -1338,6 +1257,7 @@
       inset 0 0 0 1px rgba(74,222,128,.025);
   }
 
+  .architecture-node.live-maintenance,
   .architecture-node.live-degraded {
     border-color: rgba(255,173,66,.34);
   }
@@ -1413,6 +1333,7 @@
     color: #70e6a0;
   }
 
+  .detail-health-maintenance .architecture-live-dot,
   .detail-health-degraded
     .architecture-live-dot {
     background: #ffad42;
@@ -1421,6 +1342,7 @@
       0 0 10px rgba(255,173,66,.55);
   }
 
+  .detail-health-maintenance .architecture-live-state strong,
   .detail-health-degraded
     .architecture-live-state strong {
     color: #ffbd66;

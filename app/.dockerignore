@@ -2,3 +2,19 @@ node_modules
 dist
 .git
 .vscode
+
+# Keep environment secrets and private keys out of every build-context directory.
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.keystore
+**/id_rsa*
+**/id_ed25519*
+**/id_ecdsa*
+**/id_dsa*
+**/.ssh
+**/.aws
+**/.npmrc
