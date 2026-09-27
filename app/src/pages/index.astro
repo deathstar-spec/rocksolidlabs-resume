@@ -3,6 +3,8 @@ import '../styles/global.css';
 import LiveLabStatus from '../components/LiveLabStatus.astro';
 import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
 import LabTerminal from '../components/LabTerminal.astro';
+import IncidentCaseStudy from '../components/IncidentCaseStudy.astro';
+import { incidents } from '../data/incidents.js';
 
 const skills = [
   'Windows 10/11',
@@ -214,12 +216,14 @@ const portArthurSteps = [
             <a href="#experience">Experience</a>
             <a href="#skills">Skills</a>
             <a href="#credentials">Credentials</a>
+            <a href="#incidents">Incidents</a>
             <a href="#contact">Contact</a>
           </div>
 
           <div class="nav-links lab-nav">
             <a href="#live-lab-status">Live Status</a>
             <a href="#lab-projects">Projects</a>
+            <a href="#incidents">Incidents</a>
             <a href="#contact">Contact</a>
           </div>
 
@@ -742,6 +746,15 @@ const portArthurSteps = [
             </div>
           </div>
 
+        </div>
+      </section>
+
+      <section id="incidents" aria-labelledby="incidents-title" style="scroll-margin-top: 90px">
+        <div class="container">
+          <div class="eyebrow">Rock Solid Labs // Incident Reports</div>
+          <h2 class="section-title" id="incidents-title">Incident Case Studies</h2>
+          <p class="section-intro">Sanitized troubleshooting reports from my Rock Solid Labs homelab: symptoms, investigation, recovery, and lessons for the next incident.</p>
+          {incidents.map((incident) => <IncidentCaseStudy incident={incident} />)}
         </div>
       </section>
 
