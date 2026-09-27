@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import * as monitoring from '../src/lib/monitoring.js';
+import { incidents } from '../src/data/incidents.js';
 
 const payload = (...statuses) => ({
   heartbeatList: Object.fromEntries(statuses.map((status, i) => [i, [{ status }]])),
@@ -67,6 +68,7 @@ function terminal(reduced = false) {
     '#terminal-input': input, '.terminal-window': element() };
   const context = {
     ...monitoring,
+    incidents,
     document: { querySelector: (s) => selectors[s], createElement: element },
     requestAnimationFrame: (fn) => fn(),
     window: {
@@ -123,4 +125,21 @@ test('Matrix is static with reduced motion and stops when preference changes', (
   [...finished.timeouts.values()][0]();
   assert.equal(finished.intervals.size, 0);
   assert.equal(finished.changes.size, 0);
+});
+
+
+test('incidents command lists public reports and preserves history without network or shell access', () => {
+  const ui = terminal();
+  ui.command('incidents');
+  const text = (node) => node.textContent + (node.children || []).map(text).join(' ');
+  const output = ui.lines.map(text).join('\n');
+  for (const incident of incidents) {
+    assert.ok(output.includes(`INCIDENT ${incident.number}`));
+    assert.ok(output.includes(incident.title));
+  }
+  assert.ok(output.includes('#incidents'));
+  ui.history('ArrowUp');
+  assert.equal(ui.input.value, 'incidents');
+  ui.command('help');
+  assert.ok(ui.lines.map(text).join('\n').includes('Homelab incident case studies'));
 });

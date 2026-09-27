@@ -80,6 +80,7 @@
 
 
 <script>
+  import { incidents } from '../data/incidents.js';
   import { publicGroups, summarizeMonitors, stateLabel } from '../lib/monitoring.js';
   (() => {
     const root = document.querySelector("#lab-terminal");
@@ -99,6 +100,7 @@
       about: runAbout,
       skills: runSkills,
       projects: runProjects,
+      incidents: runIncidents,
       status: runStatus,
       uptime: runUptime,
       whoami: runWhoami,
@@ -319,6 +321,7 @@
       appendStatus("about", "About Robert Peterson");
       appendStatus("skills", "Technical skills and platforms");
       appendStatus("projects", "Rock Solid Labs projects");
+      appendStatus("incidents", "Homelab incident case studies");
       appendStatus("status", "Live infrastructure health");
       appendStatus("uptime", "24-hour monitored uptime");
       appendStatus("whoami", "Current terminal identity");
@@ -417,6 +420,16 @@
         "Open the Projects section for full build notes and case studies.",
         "terminal-muted"
       );
+      appendLine("");
+    }
+
+    function runIncidents() {
+      appendLine("");
+      appendLine("HOMELAB INCIDENT CASE STUDIES", "terminal-orange");
+      for (const incident of incidents) {
+        appendStatus(`INCIDENT ${incident.number}`, incident.title);
+      }
+      appendLine("View the Incident Case Studies section below, or use the Incidents navigation link (#incidents).");
       appendLine("");
     }
 
