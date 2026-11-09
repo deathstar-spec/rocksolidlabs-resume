@@ -1,0 +1,100 @@
+---
+import '../styles/global.css';
+import { incidents } from '../data/incidents.js';
+import { engineerCategories, walkthroughs } from '../data/engineer.js';
+import IncidentWalkthrough from '../components/IncidentWalkthrough.astro';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Engineer Mode | Robert Peterson — Rock Solid Labs</title>
+    <meta name="description" content="Step through sanitized homelab incidents: investigation, root cause, recovery, and verification with Robert Peterson." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="engineer-page">
+    <a class="skip-link" href="#main">Skip to incident browser</a>
+    <header>
+      <div class="container nav engineer-header">
+        <a class="brand" href="/" aria-label="Rock Solid Labs home">ROCK SOLID <span>LABS</span></a>
+        <a class="return-link" href="/#incidents">← Back to portfolio</a>
+      </div>
+    </header>
+    <main id="main" class="container">
+      <div class="engineer-intro">
+        <p class="eyebrow">Rock Solid Labs // Engineer Mode</p>
+        <h1>Follow the failure.<br /><span>Find the dependency.</span></h1>
+        <p class="hero-copy">How I troubleshoot infrastructure: observe the symptoms, test a hypothesis, restore the dependency, and verify the result.</p>
+        <p class="intro-note">Static, sanitized homelab case studies. No live commands or infrastructure access.</p>
+      </div>
+      <nav class="engineer-categories" aria-label="Engineer Mode categories">
+        {engineerCategories.map((category) => category.href ? (
+          <a href={category.href} aria-current="page">{category.label}</a>
+        ) : (
+          <button type="button" disabled>{category.label} <span>Coming later</span></button>
+        ))}
+      </nav>
+      <section id="incidents" aria-labelledby="incidents-heading">
+        <div class="browser-heading">
+          <h2 id="incidents-heading">Incident browser</h2>
+          <p>One guided walkthrough · three documented incidents</p>
+        </div>
+        <div class="incident-grid">
+          {incidents.map((incident) => {
+            const walkthrough = walkthroughs.find((item) => item.number === incident.number);
+            return (
+              <article class="card browser-card">
+                <div class="card-meta"><span>INCIDENT {incident.number}</span><span class="project-status">RESOLVED</span></div>
+                <h3>{walkthrough?.title ?? incident.title}</h3>
+                <p>{walkthrough?.summary ?? incident.impact}</p>
+                <ul class="technology-tags" aria-label="Technologies involved">
+                  {incident.technologies.map((technology) => <li>{technology}</li>)}
+                </ul>
+                <a class:list={['button', walkthrough ? 'primary' : 'secondary']} href={walkthrough ? `#walkthrough-${incident.number}` : `/#incident-${incident.number}`}>
+                  {walkthrough ? 'Start walkthrough' : 'Read case study'}
+                  <span class="sr-only">: Incident {incident.number}</span>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+        {walkthroughs.map((incident) => <IncidentWalkthrough incident={incident} />)}
+      </section>
+    </main>
+    <footer class="container engineer-footer">Rock Solid Labs // Robert Peterson · Sanitized infrastructure troubleshooting</footer>
+  </body>
+</html>
+<style>
+  .engineer-header { flex-wrap: wrap; padding-block: 14px; }
+  .return-link { font-size: .9rem; color: var(--muted); }
+  .engineer-intro { padding: 64px 0 32px; }
+  h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); line-height: 1.08; }
+  h1 span { color: var(--orange); }
+  .intro-note { color: var(--muted); font-size: .9rem; }
+  .engineer-categories { gap: 10px; padding: 16px 0; border-block: 1px solid var(--border); }
+  .engineer-categories a, .engineer-categories button { display: inline-flex; gap: 10px; align-items: center; min-height: 44px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); font: inherit; color: var(--muted); }
+  .engineer-categories a { border-color: var(--orange); color: var(--orange); }
+  .engineer-categories button span { font-size: .72rem; }
+  .engineer-categories button:disabled { cursor: not-allowed; }
+  section { padding-top: 32px; border: 0; scroll-margin-top: 100px; }
+  .browser-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .browser-heading h2, .browser-heading p { margin: 0; }
+  .browser-heading p { color: var(--muted); font-size: .85rem; }
+  .incident-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .browser-card { display: flex; flex-direction: column; min-width: 0; }
+  .card-meta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; font: .75rem ui-monospace, monospace; color: var(--orange); }
+  .browser-card h3 { font-size: 1.15rem; line-height: 1.4; margin-bottom: 12px; }
+  .browser-card p { margin-top: 0; font-size: .95rem; }
+  .technology-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 20px 0 24px; list-style: none; }
+  .technology-tags li { padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; font: .72rem/1.5 ui-monospace, monospace; color: var(--muted); }
+  .browser-card .button { margin-top: auto; }
+  .engineer-footer { border-top: 1px solid var(--border); padding-block: 24px; font-size: .8rem; color: var(--muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .skip-link { position: fixed; top: 8px; left: 8px; transform: translateY(-200%); z-index: 30; padding: 12px; color: var(--bg); background: var(--orange); }
+  .skip-link:focus { transform: none; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+  @media (max-width: 950px) { .incident-grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 500px) { .engineer-intro { padding-top: 40px; } .engineer-categories a, .engineer-categories button { padding: 8px 10px; } }
+  @media (prefers-reduced-motion: reduce) { :global(html) { scroll-behavior: auto; } }
+</style>

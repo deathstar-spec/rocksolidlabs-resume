@@ -1,0 +1,114 @@
+---
+import type { storageWalkthrough } from '../data/engineer.js';
+interface Props { incident: typeof storageWalkthrough }
+const { incident } = Astro.props;
+const prefix = `walkthrough-${incident.number}`;
+---
+<article class="walkthrough card" id={prefix} data-walkthrough aria-labelledby={`${prefix}-title`}>
+  <div class="console-heading">
+    <div>
+      <p class="eyebrow">Incident {incident.number} // Guided investigation</p>
+      <h2 id={`${prefix}-title`}>{incident.title}</h2>
+      <p>{incident.summary}</p>
+    </div>
+    <span class="state" data-state aria-live="polite" aria-atomic="true">Historical walkthrough</span>
+  </div>
+  <p class="context">Sanitized homelab case study. The states below replay the investigation; they are not live infrastructure status.</p>
+  <div class="console-layout">
+    <div>
+      <ol class="timeline" aria-label="Investigation stages" data-timeline hidden>
+        {incident.steps.map((step, index) => (
+          <li><button type="button" data-step-button={index} aria-controls={`${prefix}-step-${index}`}>
+            <span class="step-number">{String(index + 1).padStart(2, '0')}</span> {step.title}
+          </button></li>
+        ))}
+      </ol>
+      <div class="stages">
+        {incident.steps.map((step, index) => (
+          <div class="stage" id={`${prefix}-step-${index}`} data-step data-status={step.status} data-dependency={step.dependency}>
+            <h3 tabindex="-1" data-step-heading>{index + 1}. {step.title}</h3>
+            <p>{step.summary}</p>
+            <ul class="detail-list">{step.items.map((item) => <li>{item}</li>)}</ul>
+            {'commands' in step && step.commands && (
+              <details class="diagnostics">
+                <summary>Diagnostic examples and finding</summary>
+                <p>Illustrative read-only commands. Placeholders are not real hosts or units. Nothing runs here.</p>
+                <pre><code>{step.commands.join('\n')}</code></pre>
+                <p>{step.finding}</p>
+              </details>
+            )}
+            {index === incident.steps.length - 1 && <p class="resolved">✓ INCIDENT RESOLVED</p>}
+          </div>
+        ))}
+      </div>
+      <div class="step-controls" data-controls hidden>
+        <button class="button secondary" type="button" data-previous>Previous</button>
+        <span data-progress role="status" aria-live="polite" aria-atomic="true"></span>
+        <button class="button primary" type="button" data-next>Next</button>
+      </div>
+    </div>
+    <aside class="dependency-map" aria-label="Sanitized incident architecture">
+      <h3>Dependency path</h3>
+      <p>Conceptual topology · no management access</p>
+      <ol>
+        {['Internet', 'Gateway', 'Proxmox Host', 'Application'].map((label) => <li>{label}</li>)}
+        <li class="storage-node" data-storage-node>
+          <strong>Storage Dependency</strong>
+          <span data-dependency-label>Failed mount → restored and verified</span>
+        </li>
+      </ol>
+      <p>The affected dependency is the application’s storage mount.</p>
+    </aside>
+  </div>
+  <div class="future-assistant">
+    <button class="button secondary" type="button" disabled>Ask Rocky About This Incident — Coming Later</button>
+    <p>Future incident Q&amp;A. No AI service is connected.</p>
+  </div>
+</article>
+<script>
+  import { initializeWalkthrough } from '../lib/walkthrough.js';
+  document.querySelectorAll('[data-walkthrough]').forEach(initializeWalkthrough);
+</script>
+<style>
+  .walkthrough { margin-top: 32px; scroll-margin-top: 100px; }
+  .console-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+  h2 { margin: 8px 0 12px; font-size: clamp(1.5rem, 3vw, 2.2rem); line-height: 1.2; }
+  .console-heading p { max-width: 720px; }
+  .state { flex-shrink: 0; padding: 7px 10px; border: 1px solid var(--orange); color: var(--orange); border-radius: 6px; font: .8rem/1.5 ui-monospace, monospace; }
+  .context { padding-bottom: 24px; border-bottom: 1px solid var(--border); font-size: .9rem; }
+  .console-layout { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 32px; margin-top: 24px; }
+  .timeline { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
+  button { font: inherit; cursor: pointer; }
+  .timeline button { min-height: 44px; padding: 9px 12px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); border-radius: 6px; text-align: left; }
+  .timeline button[aria-current="step"] { color: var(--text); border-color: var(--orange); background: var(--orange-soft); }
+  .step-number { font-family: ui-monospace, monospace; color: var(--orange); }
+  .stage { padding: 8px 0 24px; }
+  .stage h3 { font-size: 1.35rem; margin-bottom: 12px; }
+  .stage p { margin-top: 0; }
+  .detail-list { margin-top: 20px; }
+  .diagnostics { margin-top: 24px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  summary { cursor: pointer; color: var(--orange); min-height: 28px; }
+  .diagnostics p { margin-top: 14px; font-size: .9rem; }
+  pre { overflow-x: auto; padding: 16px; border-left: 2px solid var(--orange); color: var(--text); }
+  .step-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid var(--border); }
+  .secondary { background: var(--panel); color: var(--text); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  [data-progress] { color: var(--muted); font-size: .85rem; }
+  .dependency-map { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; align-self: start; }
+  .dependency-map h3 { font-size: 1rem; }
+  .dependency-map p { font-size: .82rem; }
+  .dependency-map ol { list-style: none; padding: 0; margin: 24px 0; }
+  .dependency-map li { position: relative; border: 1px solid var(--border); padding: 12px; text-align: center; border-radius: 6px; margin-bottom: 28px; font-size: .9rem; }
+  .dependency-map li:not(:last-child)::after { content: '↓'; position: absolute; left: 0; right: 0; bottom: -27px; color: var(--muted); }
+  .dependency-map .storage-node { border-color: var(--orange); background: var(--orange-soft); margin-bottom: 0; }
+  .storage-node span { display: block; font-size: .8rem; margin-top: 8px; }
+  .storage-node[data-resolved="true"] { border-color: var(--green); background: rgba(80,200,120,.08); }
+  .state[data-resolved="true"], .resolved { color: var(--green); border-color: var(--green); }
+  .card .resolved { color: var(--green); margin-top: 24px; font-weight: 700; }
+  .future-assistant { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .future-assistant p { font-size: .85rem; margin-top: 8px; }
+  :is(button, summary, h3):focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+  [hidden] { display: none !important; }
+  @media (max-width: 800px) { .console-layout { grid-template-columns: minmax(0, 1fr); } .console-heading { flex-direction: column; gap: 16px; } }
+  @media (max-width: 450px) { .walkthrough { padding: 18px; } .step-controls .button { padding: 0 12px; } }
+</style>

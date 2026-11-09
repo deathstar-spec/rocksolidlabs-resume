@@ -5,6 +5,7 @@ import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
 import LabTerminal from '../components/LabTerminal.astro';
 import IncidentCaseStudy from '../components/IncidentCaseStudy.astro';
 import { incidents } from '../data/incidents.js';
+import { networkMigration } from '../data/network-migration.js';
 
 const skills = [
   'Windows 10/11',
@@ -627,6 +628,17 @@ const portArthurSteps = [
             addressing, credentials or sensitive internal configuration.
           </p>
 
+          <article class="project-case migration-feature" aria-labelledby="migration-title">
+            <div class="project-heading">
+              <div><span class="project-number">FEATURED · NOVEMBER 2026</span><h3 id="migration-title">{networkMigration.title}</h3></div>
+              <span class="project-status">COMPLETED</span>
+            </div>
+            <p class="eyebrow">Network Engineering / Infrastructure</p>
+            <p class="project-summary">{networkMigration.summary}</p>
+            <div class="project-meta">{networkMigration.technologies.map((tag) => <span>{tag}</span>)}</div>
+            <a class="button primary" href={networkMigration.href}>Read migration case study <span aria-hidden="true">&nbsp;→</span></a>
+          </article>
+
           <div class="project-case">
 
             <div class="project-heading">
@@ -754,6 +766,12 @@ const portArthurSteps = [
           <div class="eyebrow">Rock Solid Labs // Incident Reports</div>
           <h2 class="section-title" id="incidents-title">Incident Case Studies</h2>
           <p class="section-intro">Sanitized troubleshooting reports from my Rock Solid Labs homelab: symptoms, investigation, recovery, and lessons for the next incident.</p>
+          <div class="card engineer-invitation">
+            <p>Technologies are easy to list. Troubleshooting is harder to demonstrate. Step through a real, sanitized homelab incident.</p>
+            <div class="actions">
+              <a class="button primary" href="/engineer/">⚡ Engineer Mode — See How I Troubleshoot</a>
+            </div>
+          </div>
           {incidents.map((incident) => <IncidentCaseStudy incident={incident} />)}
         </div>
       </section>
@@ -871,9 +889,25 @@ const portArthurSteps = [
 
   /*
    * Recruiter Mode remains the default whenever
-   * someone first opens the portfolio.
+   * someone first opens the portfolio without a Lab Mode link.
    */
-  setMode('recruiter');
+  const linkedLab = new URLSearchParams(window.location.search).get('mode') === 'lab';
+  setMode(linkedLab ? 'lab' : 'recruiter', {
+    scrollTo: linkedLab && window.location.hash === '#lab-projects' ? '#lab-projects' : undefined
+  });
 </script>
   </body>
 </html>
+
+<style>
+  .migration-feature { border-top: 2px solid var(--orange); transition: border-color .2s ease; }
+  .migration-feature:hover { border-color: var(--orange); }
+  .migration-feature .eyebrow { margin-top: 20px; }
+  .migration-feature a:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
+  @media (prefers-reduced-motion: reduce) { .migration-feature { transition: none; } }
+  .engineer-invitation { margin-top: 24px; border-color: var(--orange); }
+  .engineer-invitation p { margin-top: 0; }
+  .engineer-invitation .actions { margin-top: 18px; }
+  .engineer-invitation a { text-align: center; padding-block: 12px; }
+  .engineer-invitation a:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
+</style>

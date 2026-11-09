@@ -1,0 +1,40 @@
+<figure aria-labelledby="network-caption">
+  <div class="node upstream"><small>INTERNET EDGE</small><strong>AT&amp;T Fiber Gateway</strong><span>IP Passthrough · public IPv4 to UDM Pro</span></div>
+  <div class="connector">↓ <span>WAN1 · SFP+ port 10</span></div>
+  <div class="node gateway"><small>ROUTING · FIREWALL · DHCP</small><strong>UniFi Dream Machine Pro</strong><span>Internal LAN · existing addressing preserved</span></div>
+  <div class="branches">
+    <div>
+      <div class="connector">↓ <span>Port 11 · SFP+ LAN uplink</span></div>
+      <div class="node"><small>MULTIGIGABIT DISTRIBUTION</small><strong>UniFi Flex Mini 2.5GbE</strong></div>
+      <ul class="endpoints">
+        <li><strong>Gaming workstation</strong><span>2.5 Gbps Ethernet link</span></li>
+        <li><strong>Homelab infrastructure</strong><span>Proxmox VE · TrueNAS Storage<br />Pi-hole DNS · WireGuard VM · Docker</span></li>
+        <li><strong>Gateway eero Pro 7</strong><span>Bridge mode · wired to switch</span><ul><li>eero Pro 7 mesh node A</li><li>eero Pro 7 mesh node B</li></ul><span>Wireless mesh backhaul</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="connector">↓ <span>UDM Pro port 1</span></div>
+      <div class="node"><small>ACCESS SWITCH</small><strong>UniFi US-8-150W</strong></div>
+      <ul class="endpoints"><li><strong>UniFi AC Pro</strong><span>Access point</span></li></ul>
+    </div>
+  </div>
+  <figcaption id="network-caption">Migration topology · November 9, 2026. Lines show connectivity; link capabilities do not represent measured internet throughput. Private addresses and management endpoints are omitted.</figcaption>
+</figure>
+<style>
+  figure { margin: 28px 0 0; padding: clamp(16px, 3vw, 32px); background: var(--panel); border: 1px solid var(--border); border-radius: 18px; }
+  .node { padding: 20px; border: 1px solid var(--border); background: var(--bg); border-radius: 10px; text-align: center; }
+  .upstream, .gateway { max-width: 580px; margin-inline: auto; }
+  .gateway { border-color: var(--orange); background: var(--orange-soft); }
+  strong, small, span { display: block; }
+  small { color: var(--orange); font: .7rem/1.6 ui-monospace, monospace; letter-spacing: .08em; margin-bottom: 6px; }
+  span, figcaption { color: var(--muted); font-size: .85rem; }
+  .connector { text-align: center; color: var(--orange); padding: 12px 0; }
+  .connector span { display: inline; margin-left: 6px; }
+  .branches { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; }
+  .endpoints { list-style: none; padding: 0 0 0 20px; margin: 0 0 0 20px; border-left: 1px solid var(--orange); }
+  .endpoints > li { position: relative; margin-top: 18px; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+  .endpoints > li::before { content: ''; position: absolute; top: 26px; left: -21px; width: 20px; border-top: 1px solid var(--orange); }
+  .endpoints ul { margin: 12px 0; padding-left: 20px; color: var(--muted); font-size: .9rem; }
+  figcaption { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 650px) { .branches { grid-template-columns: minmax(0, 1fr); } .node { padding: 16px 12px; } }
+</style>

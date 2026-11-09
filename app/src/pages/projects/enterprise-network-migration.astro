@@ -1,0 +1,91 @@
+---
+import '../../styles/global.css';
+import NetworkMigrationDiagram from '../../components/NetworkMigrationDiagram.astro';
+import { networkMigration as project } from '../../data/network-migration.js';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{project.title} | Robert Peterson — Rock Solid Labs</title>
+    <meta name="description" content={project.summary} />
+    <meta name="theme-color" content="#111214" />
+    <link rel="canonical" href={`https://resume.rocksolidlabs.net${project.href}`} />
+    <link rel="icon" type="image/png" href="/branding/rock-solid-labs-mark.png" />
+    <meta property="og:title" content={project.fullTitle} />
+    <meta property="og:description" content={project.summary} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={`https://resume.rocksolidlabs.net${project.href}`} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to case study</a>
+    <header><div class="container nav case-nav">
+      <a class="brand" href="/">ROCK SOLID <span>LABS</span></a>
+      <a class="back-link" href="/?mode=lab#lab-projects">← Back to projects</a>
+    </div></header>
+    <main id="main" class="container">
+      <div class="case-hero">
+        <p class="eyebrow">Network Engineering / Infrastructure</p>
+        <p class="completion"><span class="project-status">COMPLETED</span> <time datetime="2026-11-09">November 9, 2026</time></p>
+        <h1>Enterprise Network Migration <span>&amp; Infrastructure Modernization</span></h1>
+        <p class="hero-copy">Consumer routing to centralized network control. A homelab migration spanning the gateway, wireless mesh, DNS, VPN, and application dependencies.</p>
+        <div class="project-meta" aria-label="Technologies used">{project.technologies.map((tag) => <span>{tag}</span>)}</div>
+        <nav class="case-links" aria-label="Case study sections"><a href="#overview">Overview</a><a href="#architecture">Architecture</a><a href="#implementation">Implementation</a><a href="#results">Verified results</a><a href="#lessons">Lessons &amp; next steps</a></nav>
+      </div>
+      <section id="overview" aria-labelledby="overview-title">
+        <div class="eyebrow">01 / Context</div><h2 id="overview-title">Overview</h2>
+        <p>Designed and implemented an enterprise-style network upgrade for the RockSolidLabs homelab, replacing consumer routing infrastructure with a UniFi Dream Machine Pro. The migration centralized network administration, routing, firewall policies, and DHCP while preserving an existing Proxmox virtualization environment, TrueNAS storage, Docker services, Plex, and secure WireGuard remote access.</p>
+        <h3>Challenge</h3><p>As the eero-based homelab expanded, it needed greater visibility, control, and flexibility without unnecessarily disrupting critical services.</p>
+        <ul class="detail-list"><li>Introduce dedicated routing and firewall management while preserving the existing internal subnet and addressing.</li><li>Maintain multigigabit connectivity and existing wireless coverage.</li><li>Preserve VPN access, internal DNS resolution, and application dependencies.</li><li>Establish a documented recovery approach.</li></ul>
+      </section>
+      <section id="architecture" aria-labelledby="architecture-title"><div class="eyebrow">02 / Network design</div><h2 id="architecture-title">One gateway. Clear responsibilities.</h2><p>The UDM Pro owns routing and DHCP; bridged eero nodes provide wireless coverage. The topology below records the completed migration.</p><NetworkMigrationDiagram /></section>
+      <section id="implementation" aria-labelledby="implementation-title">
+        <div class="eyebrow">03 / Implementation</div><h2 id="implementation-title">Migrate the network. Validate the dependencies.</h2>
+        <div class="workstreams">{project.workstreams.map(([title, description], index) => <article><span class="step">{String(index + 1).padStart(2, '0')}</span><div><h3>{title}</h3><p>{description}</p></div></article>)}</div>
+        <aside class="lesson-box"><h3>Troubleshooting focus: stale WAN lease</h3><p>The passthrough assignment had moved to the new router, but its WAN still held a private DHCP lease. Checking the assignment and lease state isolated the stale lease; a controlled WAN reconnection restored public addressing. Recheck WAN addressing and external VPN access after gateway changes.</p></aside>
+      </section>
+      <section id="results" aria-labelledby="results-title"><div class="eyebrow">04 / Validation</div><h2 id="results-title">Verified results</h2><p>Results recorded by Robert Peterson at completion on November 9, 2026. This is a migration snapshot, not live monitoring. Ethernet link speed and measured internet throughput are reported separately.</p>
+        <dl class="metrics">{project.metrics.map(([value, label, note]) => <div class="metric"><dt>{label}</dt><dd>{value}</dd><p>{note}</p></div>)}</dl>
+      </section>
+      <section id="lessons" aria-labelledby="lessons-title"><div class="eyebrow">05 / Engineering takeaways</div><h2 id="lessons-title">Lessons learned</h2><ul class="detail-list">{project.lessons.map((lesson) => <li>{lesson}</li>)}</ul>
+        <div class="planned"><p class="eyebrow">Planned / Not yet implemented</p><h3>Future improvements</h3><ul class="detail-list">{project.planned.map((item) => <li>{item}</li>)}</ul></div>
+        <div class="actions"><a class="button primary" href="/?mode=lab#lab-projects">Explore more projects</a><a class="button secondary" href="/engineer/">Explore Engineer Mode</a></div>
+      </section>
+    </main>
+    <footer><div class="container">Rock Solid Labs · Designed, built and self-hosted by Robert Peterson.</div></footer>
+  </body>
+</html>
+<style>
+  .case-nav { flex-wrap: wrap; padding-block: 14px; }
+  .back-link { color: var(--muted); font-size: .9rem; padding-block: 8px; }
+  .case-hero { padding: 64px 0 32px; }
+  .completion { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: .85rem; }
+  h1 { max-width: 1000px; font-size: clamp(2.3rem, 5.4vw, 4.6rem); line-height: 1.08; margin-block: 24px; }
+  h1 span { display: block; color: var(--orange); }
+  h2 { font-size: clamp(1.7rem, 3vw, 2.5rem); line-height: 1.2; letter-spacing: -.03em; margin: 10px 0 20px; }
+  h3 { font-size: 1.15rem; margin: 0 0 10px; }
+  p { color: var(--muted); }
+  section { padding-block: 48px; scroll-margin-top: 110px; }
+  section > p { max-width: 850px; }
+  section > h3 { margin-top: 28px; }
+  .case-links { gap: 10px 24px; border-top: 1px solid var(--border); padding-top: 24px; }
+  .case-links a { display: inline-flex; min-height: 44px; align-items: center; }
+  .workstreams article { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 18px; padding: 24px 0; border-bottom: 1px solid var(--border); }
+  .workstreams p { margin: 0; max-width: 850px; }
+  .step { color: var(--orange); font-family: ui-monospace, monospace; }
+  .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+  .metric { display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: linear-gradient(160deg, var(--panel-light), var(--panel)); }
+  .metric:nth-child(-n+3) { border-top: 2px solid var(--orange); }
+  dt { font-size: .9rem; }
+  dd { margin: 12px 0 0; color: var(--orange); font-size: clamp(1.5rem, 2.4vw, 2rem); font-weight: 750; letter-spacing: -.03em; }
+  .metric p { font-size: .8rem; margin: auto 0 0; padding-top: 8px; }
+  .planned { margin-top: 40px; padding: 24px; border: 1px dashed var(--border); border-radius: 12px; }
+  .planned .eyebrow { color: var(--orange); }
+  .skip-link { position: fixed; top: 8px; left: 8px; transform: translateY(-200%); z-index: 30; padding: 12px; background: var(--orange); color: var(--bg); }
+  .skip-link:focus { transform: none; }
+  a:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+  @media (max-width: 800px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 500px) { .metrics { grid-template-columns: minmax(0, 1fr); } .case-hero { padding-top: 36px; } .case-nav { gap: 4px 18px; } }
+  @media (prefers-reduced-motion: reduce) { :global(html) { scroll-behavior: auto; } }
+</style>
